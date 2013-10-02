@@ -26,13 +26,17 @@ possible keys are:
 * irqgpio = the GPIO pin of the irq
 * mode = the SPI mode
 * pd = platform data (hex list - first number is the length of the structure)
+* pds32-<offset> = sets the integer-value at byte-offset <offset> of the platform data (value can be prefixed with 0x for hex and 0 for octal)
+* pdu32-<offset> = sets the integer-value at byte-offset <offset> of the platform data (value can be prefixed with 0x for hex and 0 for octal)
+* pdu16-<offset> = sets the u16-value at byte-offset <offset> of the platform data (value can be prefixed with 0x for hex and 0 for octal)
+* pdu8-<offset> = sets the u8-value at byte-offset <offset> of the platform data (value can be prefixed with 0x for hex and 0 for octal)
 
-so the following:
+So the following:
 
 ```
 modprobe spi-config devices=\
-bus=0:cs=0:modalias=mcp2515:speed=10000000:gpioirq=25:pd=140024f4000220,\
-bus=0:cs=1:modalias=mcp2515:speed=6000000:gpioirq=22:pd=14002d31000200
+bus=0:cs=0:modalias=mcp2515:speed=10000000:gpioirq=25:pd=14:pds32-0=16000000:pdsu32-4=0x2002,\
+bus=0:cs=1:modalias=mcp2515:speed=6000000:gpioirq=22:pd=14:pds32-0=20000000:pdsu32-4=0x02
 ```
 
 will configure:

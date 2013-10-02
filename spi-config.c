@@ -85,6 +85,7 @@ static void register_device(char *devdesc) {
 	/* the board we configure */
 	struct spi_board_info *brd;
 	int brd_irq_gpio; /* an info that is not in the board */
+	int pd_len=0; /* the length of the platform data */
 	
 	/* the master to which we connect */
 	struct spi_master *master;
@@ -157,6 +158,7 @@ static void register_device(char *devdesc) {
 				printk(KERN_ERR " spi_config_register: the pd length can not get parsed in %s - ignoring config\n",value);
 				goto register_device_err;
 			}
+			pd_len=len;
 			/* now we allocate it */
 			brd->platform_data=dst=kmalloc(len,GFP_KERNEL);
 			memset(dst,0,len);
@@ -178,6 +180,78 @@ static void register_device(char *devdesc) {
 					dst++;len--;
 				}
 			}
+		} else if (strncmp(key,"pds32-",6)==0) {
+			u8 offset;
+			s32 v;
+			/* store an integer in pd */
+			if (kstrtou8(key+6,16,&offset)) {
+				printk(KERN_ERR " spi_config_register: the pds32 position can not get parsed in %s - ignoring config\n",key+6);
+				goto register_device_err;
+			}
+			if(offset+3>=pd_len) {
+				printk(KERN_ERR " spi_config_register: the pds32 position %02x is larger than the length of the structure (%02x) - ignoring config\n",offset,pd_len);
+				goto register_device_err;
+			}
+			/* now read the value */
+			if (kstrtoint(value,0,&v)) {
+				printk(KERN_ERR " spi_config_register: the pds32 value can not get parsed in %s - ignoring config\n",value);
+				goto register_device_err;
+			}
+			*((s32*)(brd->platform_data+offset))=v;
+		} else if (strncmp(key,"pdu32-",6)==0) {
+			u8 offset;
+			u32 v;
+			/* store an integer in pd */
+			if (kstrtou8(key+6,16,&offset)) {
+				printk(KERN_ERR " spi_config_register: the pdu32 position can not get parsed in %s - ignoring config\n",key+6);
+				goto register_device_err;
+			}
+			if(offset+3>=pd_len) {
+				printk(KERN_ERR " spi_config_register: the pdu32 position %02x is larger than the length of the structure (%02x) - ignoring config\n",offset,pd_len);
+				goto register_device_err;
+			}
+			/* now read the value */
+			if (kstrtou32(value,0,&v)) {
+				printk(KERN_ERR " spi_config_register: the pds32 value can not get parsed in %s - ignoring config\n",value);
+				goto register_device_err;
+			}
+			*((u32*)(brd->platform_data+offset))=v;
+		} else if (strncmp(key,"pdu16-",6)==0) {
+			u8 offset;
+			u16 v;
+			/* store an integer in pd */
+			if (kstrtou8(key+6,16,&offset)) {
+				printk(KERN_ERR " spi_config_register: the pdu16 position can not get parsed in %s - ignoring config\n",key+6);
+				goto register_device_err;
+			}
+			if(offset+1>=pd_len) {
+				printk(KERN_ERR " spi_config_register: the pdu16 position %02x is larger than the length of the structure (%02x) - ignoring config\n",offset,pd_len);
+				goto register_device_err;
+			}
+			/* now read the value */
+			if (kstrtou16(value,0,&v)) {
+				printk(KERN_ERR " spi_config_register: the pdu16 value can not get parsed in %s - ignoring config\n",value);
+				goto register_device_err;
+			}
+			*((u16*)(brd->platform_data+offset))=v;
+		} else if (strncmp(key,"pdu8-",5)==0) {
+			u8 offset;
+			u8 v;
+			/* store an integer in pd */
+			if (kstrtou8(key+5,16,&offset)) {
+				printk(KERN_ERR " spi_config_register: the pdu8 position can not get parsed in %s - ignoring config\n",key+5);
+				goto register_device_err;
+			}
+			if(offset>=pd_len) {
+				printk(KERN_ERR " spi_config_register: the pdu8 position %02x is larger than the length of the structure (%02x) - ignoring config\n",offset,pd_len);
+				goto register_device_err;
+			}
+			/* now read the value */
+			if (kstrtou8(value,0,&v)) {
+				printk(KERN_ERR " spi_config_register: the pdu8 value can not get parsed in %s - ignoring config\n",value);
+				goto register_device_err;
+			}
+			*((u8*)(brd->platform_data+offset))=v;
 		} else {
 			printk(KERN_ERR " spi_config_register: unsupported argument %s\n",key);
 			goto register_device_err;
