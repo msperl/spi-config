@@ -5,17 +5,23 @@ spi board configuration without having to recompile the kernel
 
 Compiling
 ---------
+```
 make
 make install
+```
 
 Usage:
 ------
+loading the module:
+
 ```modprobe spi-config devices=<devicedev1>,<devicedev2>,...,<devicedev16>```
 
-and a device is defined as follows:
+and a <devicedev> is defined as follows:
+
 ```<bus>:<cs>:<driver>:<speed>:<irq>:<extra args for driver setup - requires special code>```
 
 so the following:
+
 ```modprobe spi-config devices=0:0:mcp251x:10000000:25,0:1:spidev:2000000```
 
 will configure:
