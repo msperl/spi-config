@@ -26,9 +26,12 @@ possible keys are:
 * irqgpio = the GPIO pin of the irq
 * mode = the SPI mode
 * pd = platform data (hex list - first number is the length of the structure)
-* pds32-<offset> = sets the integer-value at byte-offset <offset> of the platform data (value can be prefixed with 0x for hex and 0 for octal)
-* pdu32-<offset> = sets the integer-value at byte-offset <offset> of the platform data (value can be prefixed with 0x for hex and 0 for octal)
-* pdu16-<offset> = sets the u16-value at byte-offset <offset> of the platform data (value can be prefixed with 0x for hex and 0 for octal)
+* pds64-<offset> = sets the s64-value at byte-offset <offset> of the platform data (value can be prefixed with 0x for hex and 0 for octal)
+* pdu64-<offset> = sets the u64-value at byte-offset <offset> of the platform data (value can be prefixed with 0x for hex and 0 for octal)
+* pds32-<offset> = sets the s32-value at byte-offset <offset> of the platform data (value can be prefixed with 0x for hex and 0 for octal)
+* pdu32-<offset> = sets the u32-value at byte-offset <offset> of the platform data (value can be prefixed with 0x for hex and 0 for octal)
+* pds16-<offset> = sets the u16-value at byte-offset <offset> of the platform data (value can be prefixed with 0x for hex and 0 for octal)
+* pdu16-<offset> = sets the s16-value at byte-offset <offset> of the platform data (value can be prefixed with 0x for hex and 0 for octal)
 * pdu8-<offset> = sets the u8-value at byte-offset <offset> of the platform data (value can be prefixed with 0x for hex and 0 for octal)
 
 So the following:
