@@ -18,7 +18,7 @@ loading the module:
 
 and a ```<devicedev>``` is defined as follows:
 
-```<bus>:<cs>:<driver>:<speed>:<irq>:<extra args for driver setup - requires special code>```
+```<bus>:<cs>:<modinfo>:<max_speed_hz>:<irq>:<extra args for driver setup - requires special code>```
 
 so the following:
 
