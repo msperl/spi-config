@@ -15,3 +15,11 @@
 *.exe
 *.out
 *.app
+
+# and the kernel objects:
+*.cmd
+.tmp_versions/
+Module.symvers
+modules.order
+*.ko
+*.mod.c
