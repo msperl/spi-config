@@ -33,8 +33,6 @@
 #include <linux/string.h>
 #include <linux/spi/spi.h>
 
-#include <linux/can/platform/mcp251x.h>
-
 /* the module parameters */
 static char* devices="";
 module_param(devices, charp, S_IRUGO);
