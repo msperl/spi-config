@@ -167,7 +167,7 @@ static void register_device(char *devdesc) {
 	brd->irq=irq;
 	strncpy(brd->modalias,modalias,sizeof(brd->modalias));
 	/* and now check the extra data */
-	if ((strcmp(brd->modalias,"mcp2515")==0)||(strcmp(brd->modalias,"mcp251x")==0)) {
+	if (strcmp(brd->modalias,"mcp2515")==0) {
 		struct mcp251x_platform_data *pd=kmalloc(sizeof(struct mcp251x_platform_data),GFP_KERNEL);
 		memset(pd,0,sizeof(struct mcp251x_platform_data));
 		pd->irq_flags = IRQF_TRIGGER_FALLING|IRQF_ONESHOT;
