@@ -16,7 +16,7 @@ loading the module:
 
 ```modprobe spi-config devices=<devicedev1>,<devicedev2>,...,<devicedev16>```
 
-and a <devicedev> is defined as follows:
+and a ```<devicedev>``` is defined as follows:
 
 ```<bus>:<cs>:<driver>:<speed>:<irq>:<extra args for driver setup - requires special code>```
 
