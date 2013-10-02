@@ -29,7 +29,8 @@ possible keys are:
 
 so the following:
 
-```modprobe spi-config devices=\
+```
+modprobe spi-config devices=\
 bus=0:cs=0:modalias=mcp2515:speed=10000000:gpioirq=25:pd=140024f4000220,\
 bus=0:cs=0:modalias=mcp2515:speed=6000000:gpioirq=22:pd=14002d31000200
 ```
