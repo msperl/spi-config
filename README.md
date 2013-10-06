@@ -33,6 +33,8 @@ possible keys are:
 * pds16-<offset> = sets the u16-value at byte-offset <offset> of the platform data (value can be prefixed with 0x for hex and 0 for octal)
 * pdu16-<offset> = sets the s16-value at byte-offset <offset> of the platform data (value can be prefixed with 0x for hex and 0 for octal)
 * pdu8-<offset> = sets the u8-value at byte-offset <offset> of the platform data (value can be prefixed with 0x for hex and 0 for octal)
+* force_release = forces a release of a spi device if it has NOT been configured by this module 
+  this action taints the kernel!!! Also this is defined without a =<value>.
 
 So the following:
 
