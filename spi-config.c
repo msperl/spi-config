@@ -21,6 +21,7 @@
 #define MAX_DEVICES 16
 
 #include <linux/kernel.h>
+#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/interrupt.h>
 #include <linux/clk.h>
@@ -425,7 +426,11 @@ static void register_device(char *devdesc) {
 				/* write the message */
 				printk(KERN_ERR " spi_config_register:spi%i.%i:%s: forcefully-releasing already registered device taints kernel\n", brd->bus_num,brd->chip_select,brd->modalias);
 				/* let us taint the kernel */
+#if LINUX_VERSION_CODE <= KERNEL_VERSION(3,9,0)
+				add_taint(TAINT_FORCED_MODULE);
+#else
 				add_taint(TAINT_FORCED_MODULE,LOCKDEP_STILL_OK);
+#endif
 				/* the below leaves some unallocated memory wasting kernel memory !!! */
 				spi_unregister_device((struct spi_device*)found);
 				put_device(found);
