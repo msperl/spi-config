@@ -69,8 +69,8 @@ static void __exit spi_config_exit(void)
 	int i;
 	/* unregister devices */
 	for(i=0;i<MAX_DEVICES;i++) {
-		if (spi_devices[i]) { 
-			release_device(spi_devices[i]); 
+		if (spi_devices[i]) {
+			release_device(spi_devices[i]);
 			spi_devices[i]=NULL;
 		}
 	}
@@ -79,6 +79,25 @@ static void __exit spi_config_exit(void)
 }
 module_exit(spi_config_exit);
 
+int spi_config_match_cs(struct device * dev, void *data) {
+	/* convert pointers to something we need */
+	struct spi_device *sdev=(struct spi_device *)dev;
+	u8 cs=(int)data;
+	/* convert to SPI device */
+	printk(KERN_INFO " spi_config_match_cs: SPI%i: check CS=%i to be %i\n",sdev->master->bus_num,sdev->chip_select,cs);
+
+	if (sdev->chip_select == cs) {
+		if (dev->driver) {
+			printk(KERN_INFO " spi_config_match_cs: SPI%i.%i: Found a device with modinfo %s\n",sdev->master->bus_num,sdev->chip_select,dev->driver->name);
+		} else {
+			printk(KERN_INFO " spi_config_match_cs: SPI%i.%i: Found a device, but no driver...\n",sdev->master->bus_num,sdev->chip_select);
+		}
+		return 1;
+	}
+	/* by default return 0 - no match */
+	return 0;
+}
+
 static void register_device(char *devdesc) {
 	char *tmp;
 	int i;
@@ -86,7 +105,8 @@ static void register_device(char *devdesc) {
 	struct spi_board_info *brd;
 	int brd_irq_gpio; /* an info that is not in the board */
 	int pd_len=0; /* the length of the platform data */
-	
+	int force_release=0; /* flag for removing previous module - if not allocated by us...*/
+
 	/* the master to which we connect */
 	struct spi_master *master;
 	/* log the parameter */
@@ -108,8 +128,14 @@ static void register_device(char *devdesc) {
 		value=tmp;
 		key=strsep(&value,"=");
 		if (!value) {
-			printk(KERN_ERR " spi_config_register: incomplete argument: %s - no value\n",key);
-			goto register_device_err;
+			/* some keyonly fields */
+			if (strcmp(key,"force_release")==0) {
+				force_release=1;
+				continue;
+			} else {
+				printk(KERN_ERR " spi_config_register: incomplete argument: %s - no value\n",key);
+				goto register_device_err;
+			}
 		}
 		if (strcmp(key,"bus")==0) {
 			if (kstrtos16(value,10,&brd->bus_num)) {
@@ -164,7 +190,6 @@ static void register_device(char *devdesc) {
 			memset(dst,0,len);
 			/* and now we fill it in with the rest of the data */
 			while (len) {
-				
 				hex[0]=*(src++);
 				if (!hex[0]) { break; }
 				hex[1]=*(src++);
@@ -172,7 +197,7 @@ static void register_device(char *devdesc) {
 					printk(KERN_ERR " spi_config_register: the pd data is not of expected length in %s - ignoring config\n",
 						value);
 					goto register_device_err;
-				} 
+				}
 				if (kstrtou8(hex,16,dst)) {
 					printk(KERN_ERR " spi_config_register: the pd data could not get parsed for %s in %s - ignoring config\n",
 						hex,value);
@@ -345,6 +370,27 @@ static void register_device(char *devdesc) {
 			return;
 		}
 	}
+	/* check if a device exists already for the requested cs - but is not allocated by us...*/
+	if (master) {
+		struct device *found=device_find_child(&master->dev,(void*)(int)brd->chip_select,spi_config_match_cs);
+		if (found) {
+			printk(KERN_ERR "spi_config_register:spi%i.%i:%s: found already registered device\n", brd->bus_num,brd->chip_select,brd->modalias);
+			if (force_release) {
+				/* write the message */
+				printk(KERN_ERR " spi_config_register:spi%i.%i:%s: forcefully-releasing already registered device taints kernel\n", brd->bus_num,brd->chip_select,brd->modalias);
+				/* let us taint the kernel */
+				add_taint(TAINT_FORCED_MODULE,LOCKDEP_STILL_OK);
+				/* the below leaves some unallocated memory wasting kernel memory !!! */
+				spi_unregister_device((struct spi_device*)found);
+				put_device(found);
+			} else {
+				printk(KERN_ERR " spi_config_register:spi%i.%i:%s: if you are sure you may add force_release to the arguments\n", brd->bus_num,brd->chip_select,brd->modalias);
+				/* release device - needed from device_find_child */
+				put_device(found);
+				goto register_device_err;
+			}
+		}
+	}
 	/* now check modalias */
 	if (!brd->modalias[0]) {
 		printk(KERN_ERR " spi_config_register:spi%i.%i: modalias not set - ignoring config\n",
@@ -357,7 +403,7 @@ static void register_device(char *devdesc) {
 			brd->bus_num,brd->chip_select,brd->modalias,brd->max_speed_hz);
 		goto register_device_err;
 	}
-	
+
 	/* register the device */
 	if ((spi_devices[spi_devices_count]=spi_new_device(master,brd))) {
 		/* now report the settings */
