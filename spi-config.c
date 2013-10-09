@@ -40,10 +40,12 @@ module_param(devices, charp, S_IRUGO);
 MODULE_PARM_DESC(devices, "SPI device configs");
 /* the devices that we have registered */
 static struct spi_device *spi_devices[MAX_DEVICES];
+u16 spi_devices_bus[MAX_DEVICES];
+u16 spi_devices_cs[MAX_DEVICES];
 static int spi_devices_count=0;
 
 static void register_device(char *devdesc);
-static void release_device(struct spi_device * dev);
+static void release_device(u16 bus, u16 cs,struct spi_device * dev);
 
 static int __init spi_config_init(void)
 {
@@ -71,7 +73,7 @@ static void __exit spi_config_exit(void)
 	/* unregister devices */
 	for(i=0;i<MAX_DEVICES;i++) {
 		if (spi_devices[i]) {
-			release_device(spi_devices[i]);
+			release_device(spi_devices_bus[i],spi_devices_cs[i],spi_devices[i]);
 			spi_devices[i]=NULL;
 		}
 	}
@@ -457,6 +459,9 @@ static void register_device(char *devdesc) {
 
 	/* register the device */
 	if ((spi_devices[spi_devices_count]=spi_new_device(master,brd))) {
+		spi_devices_bus[i]=spi_devices[spi_devices_count]->master->bus_num;
+		spi_devices_cs[i]=spi_devices[spi_devices_count]->chip_select;
+
 		/* now report the settings */
 		if (spi_devices[spi_devices_count]->irq<0) {
 			printk(KERN_INFO "spi_config_register:spi%i.%i: registering modalias=%s with max_speed_hz=%i mode=%i and no interrupt\n",
@@ -503,7 +508,28 @@ register_device_err:
 	return;
 }
 
-static void release_device(struct spi_device *spi) {
+static void release_device(u16 bus, u16 cs,struct spi_device *spi) {
+	/* checking if the device is still "ours" */
+	struct spi_master *master=NULL;
+	struct device *found=NULL;
+	/* first the bus */
+	master=spi_busnum_to_master(bus);
+	if (!master) {
+		printk(KERN_ERR " spi_config_register: no spi%i bus found - not deallocating\n",bus);
+		return;
+	}
+	/* now check the device for the cs we keep on record */
+	found=device_find_child(&master->dev,(void*)(int)cs,spi_config_match_cs);
+	if (! found) {
+		printk(KERN_ERR " spi_config_register: no spi%i.%i bus found - not deallocating\n",bus,cs);
+		return;
+	}
+	/* and compare if it is still the same as our own record */
+	if (found != &spi->dev) { 
+		printk(KERN_ERR " spi_config_register: the device spi%i.%i is different from the one we allocated - not deallocating\n",bus,cs);
+		return;
+	}
+
 	printk(KERN_INFO "spi_config_unregister:spi%i.%i: unregister device with modalias %s\n", spi->master->bus_num,spi->chip_select,spi->modalias);
 	/* unregister device */
 	spi_unregister_device(spi);
