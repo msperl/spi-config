@@ -45,8 +45,8 @@ So the following:
 
 ```
 modprobe spi-config devices=\
-bus=0:cs=0:modalias=mcp2515:speed=10000000:gpioirq=25:pd=20:pdu32-0=16000000:pdsu32-4=0x2002,\
-bus=0:cs=1:modalias=mcp2515:speed=6000000:gpioirq=22:pd=0x14:pdu32-0=20000000:pdsu32-4=0x02
+bus=0:cs=0:modalias=mcp2515:speed=10000000:gpioirq=25:pd=20:pdu32-0=16000000:pdu32-4=0x2002,\
+bus=0:cs=1:modalias=mcp2515:speed=6000000:gpioirq=22:pd=0x14:pdu32-0=20000000:pdu32-4=0x02
 ```
 
 will configure:
