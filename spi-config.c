@@ -167,7 +167,7 @@ static void register_device(char *devdesc) {
 				goto register_device_err;
 			}
 		} else if (strcmp(key,"mode")==0) {
-			if (kstrtou8(value,10,&brd->mode)) {
+			if (kstrtou16(value,10,&brd->mode)) {
 				printk(KERN_ERR " spi_config_register: %s=%s can not get parsed - ignoring config\n",key,value);
 				goto register_device_err;
 			}
@@ -410,7 +410,7 @@ static void register_device(char *devdesc) {
 	/* check if we are not in the list of registered devices already */
 	for(i=0;i<spi_devices_count;i++) {
 		if (
-			(spi_devices[i]) 
+			(spi_devices[i])
 			&& (brd->bus_num==spi_devices[i]->master->bus_num)
 			&& (brd->chip_select==spi_devices[i]->chip_select)
 			) {
@@ -525,7 +525,7 @@ static void release_device(u16 bus, u16 cs,struct spi_device *spi) {
 		return;
 	}
 	/* and compare if it is still the same as our own record */
-	if (found != &spi->dev) { 
+	if (found != &spi->dev) {
 		printk(KERN_ERR " spi_config_register: the device spi%i.%i is different from the one we allocated - not deallocating\n",bus,cs);
 		return;
 	}
