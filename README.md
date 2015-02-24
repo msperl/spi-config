@@ -3,6 +3,18 @@ spi-config
 
 spi board configuration without having to recompile the kernel
 
+NOTE: it is no longer recommended to use spi-config with the newer kernels 
+that have device-tree enabled.
+
+For an example how to configure via device-tree overlays please look at:
+https://github.com/raspberrypi/linux/issues/848
+
+this includes:
+* clocks
+* interrupts
+* gpio directions
+* spi registrations
+
 Compiling
 ---------
 ```
